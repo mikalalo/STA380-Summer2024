@@ -1,0 +1,49 @@
+## Probability Practice 
+# Part A
+
+prob.yes = 0.65
+prob.no = 0.35
+
+prob.rc = 0.30
+prob.tc = 0.70 
+
+prob.rc.yes = 0.50 
+prob.rc.no = 0.50 
+
+
+# what fraction are truthful AND answered yes 
+# i asked Chat GPT to give me the formula for total probability 
+# P(A) = P(A|B)P(B) + P(A|C)P(C)
+# P(Yes) = P(Yes|RC) * P(RC) + P(Yes|TC) * P(TC)
+# 0.65 = 0.5 * 0.3 + P(Yes|TC) * 0.70 
+prob.yes.tc = (prob.yes - (prob.rc.yes * prob.rc)) / prob.tc
+prob.yes.tc
+
+# In part A, the rule of total probability was used in order to calculate the fraction of people who are truthful clickers and answered yes. 
+# The fraction of people that are truthful clickers and answered yes is 0.7142857 or 71.43%.
+
+
+## Probability Practice 
+# Part B 
+
+sensitivity = 0.993 # P(positive, disease) 
+specificity = 0.9999 # probability of testing negative and not having disease
+incidence = 0.000025 # probability of disease
+no.disease = 1 - incidence # probability of not having disease
+false.positive = 1 - specificity  # probability of testing positive and not having the disease 
+
+# I asked Chat GPT what formulas are needed for the equation- was told to use rule of total probability followed by Bayes Theorem 
+# probability of positive needs total probability 
+# P(pos) = P(Post|Disease) * P(Disease) + P(Pos|no Disease) * P(No Disease) 
+# P(Pos | No disease) = 1 - P(Pos | Disease)
+prob.positive = (sensitivity * incidence) + (false.positive * no.disease)
+prob.positive
+
+# probability they have the disease if they tested positive 
+# Bayes 
+# P(Disease|Positive) = (P(Positive|Disease) * P(Disease)) / P(Positive) 
+prob.disease.pos = (sensitivity * incidence) / prob.positive
+prob.disease.pos
+
+# The probability that someone tests positive and that actually have the disease is 0.1988824 or 19.88%. 
+# The probability was calculated by first calculating the probability of not having the disease and the probability of testing positive and not having the disease. The Rule of Total Probability was used in order to calculate the probability of person testing positive. Baye's Theorem was then used to determine the probability of having the disease if they test positive. 

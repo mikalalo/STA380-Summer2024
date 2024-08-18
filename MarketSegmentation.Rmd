@@ -1,0 +1,180 @@
+---
+title: "exercises"
+author: "group: Tea, Mikala, Alicia"
+date: "2024-08-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Market Segmentation
+
+In efforts to help NutrientH20 better understand their social-media audience, I have investigated the data to help identify areas of interest. The first step I took was looking at the structure of the data to understand how to explore it best. Below you can see some of the work I did for that. 
+
+```{r}
+social_marketing <- read_csv("social_marketing.csv")
+names(social_marketing)
+
+# changing the user column name to user because the "...1" was weird
+
+colnames(social_marketing) <- c("user","chatter", "current_events", "travel", "photo_sharing", "uncategorized",  "tv_film", "sports_fandom", "politics", "food", "family", "home_and_garden", "music", "news", "online_gaming", "shopping", "health_nutrition", "college_uni",  "sports_playing", "cooking", "eco", "computers", "business", "outdoors", "crafts", "automotive", "art", "religion", "beauty", "parenting", 
+"dating", "school", "personal_fitness", "fashion", "small_business", "spam",  "adult")
+
+
+dim(social_marketing)
+hist(social_marketing$college_uni)
+summary(social_marketing)
+str(social_marketing)
+
+```
+
+The next step I took was finding the most relevant categories. I captured the median of each column because I wanted to identify categories that were popular among the followers. A median greater than 0 indicates that at least half of the users have posted about something in that category at least once. This is important because it means the category is relevant to a significant portion of the user base.Below is the chunk where I explored that. 
+
+```{r}
+categories <- social_marketing[,!names(social_marketing) %in% 'user']
+names(categories)
+str(categories)
+sum(is.na(categories))
+
+# want to return the medians of each column, I had chatGPT write this chunk for me because I didn't wanna write the same thing over and over because I couldn't get the for loop to work properly
+medians <- list(
+  chatter = median(categories$chatter, na.rm = TRUE),
+  current_events = median(categories$current_events, na.rm = TRUE),
+  travel = median(categories$travel, na.rm = TRUE),
+  photo_sharing = median(categories$photo_sharing, na.rm = TRUE),
+  uncategorized = median(categories$uncategorized, na.rm = TRUE),
+  tv_film = median(categories$tv_film, na.rm = TRUE),
+  sports_fandom = median(categories$sports_fandom, na.rm = TRUE),
+  politics = median(categories$politics, na.rm = TRUE),
+  food = median(categories$food, na.rm = TRUE),
+  family = median(categories$family, na.rm = TRUE),
+  home_and_garden = median(categories$home_and_garden, na.rm = TRUE),
+  music = median(categories$music, na.rm = TRUE),
+  news = median(categories$news, na.rm = TRUE),
+  online_gaming = median(categories$online_gaming, na.rm = TRUE),
+  shopping = median(categories$shopping, na.rm = TRUE),
+  health_nutrition = median(categories$health_nutrition, na.rm = TRUE),
+  college_uni = median(categories$college_uni, na.rm = TRUE),
+  sports_playing = median(categories$sports_playing, na.rm = TRUE),
+  cooking = median(categories$cooking, na.rm = TRUE),
+  eco = median(categories$eco, na.rm = TRUE),
+  computers = median(categories$computers, na.rm = TRUE),
+  business = median(categories$business, na.rm = TRUE),
+  outdoors = median(categories$outdoors, na.rm = TRUE),
+  crafts = median(categories$crafts, na.rm = TRUE),
+  automotive = median(categories$automotive, na.rm = TRUE),
+  art = median(categories$art, na.rm = TRUE),
+  religion = median(categories$religion, na.rm = TRUE),
+  beauty = median(categories$beauty, na.rm = TRUE),
+  parenting = median(categories$parenting, na.rm = TRUE),
+  dating = median(categories$dating, na.rm = TRUE),
+  school = median(categories$school, na.rm = TRUE),
+  personal_fitness = median(categories$personal_fitness, na.rm = TRUE),
+  fashion = median(categories$fashion, na.rm = TRUE),
+  small_business = median(categories$small_business, na.rm = TRUE),
+  spam = median(categories$spam, na.rm = TRUE),
+  adult = median(categories$adult, na.rm = TRUE)
+)
+medians
+```
+
+From this output we see that chatter, current_events, travel, photo_sharing, tv_film, sports_fandom, politics, food, family, shopping, health_nutrition college_uni, and cooking (also the uncategorized category, which is irrelevant in this case) are all columns that have medians that are greater than zero. Within the week span that this sample was taken, NutrientH20's customers are  talking about topics that fall into these categories. By looking at a few hisograms of each category, the data is very left skew, meaning that most users are not posting anything about these categories (0 posts). The median gives us a good idea which topics are actually being talked about by the followers. 
+
+Here are some histograms that demonstrate the skew:
+```{r}
+hist(categories$travel)
+hist(categories$shopping)
+hist(categories$food)
+```
+
+Next, we will perform Principal Component Analysis (PCA) on relevant categories to reduce dimesnionality and use those components to do hierarchical clustering. Doing this ensures that clustering is based on the most significant features of the data, making it more robust and interpretable. A brief explantaion about how PCA and hierarchical clustering work: 
+
+PCA - Reduces the complexity of the data, which can help in visualizing patterns and relationships. Simplifying the data can make clustering algorithms more effective and easier to interpret.
+
+Hierachical Clustering- Directly segments your data into clusters, making it clear which individuals belong to which segment.Also, it does not require assumptions about the number of clusters ahead of time. We decided the optimal number of clusters based on the elbow plot. 
+
+```{r}
+library(dplyr)
+library(stats)
+library(ggplot2)
+library(ggdendro)
+```
+
+```{r}
+relevant <- categories[, c('current_events', 'travel', 'photo_sharing', 'tv_film', 
+                            'sports_fandom', 'politics', 'food', 'family', 
+                            'shopping', 'health_nutrition', 'college_uni', 'cooking')]
+
+
+pca_result <- prcomp(relevant, scale. = TRUE)
+pca_data <- data.frame(pca_result$x[, 1:2])  # Extract the first two principal components
+
+# compute Euclidean distance on PCA-reduced data
+dist_matrix <- dist(pca_data, method = "euclidean")
+
+
+hc <- hclust(dist_matrix, method = "average")
+
+# determine optimal number of clusters using elbow plot
+wcss <- numeric()
+for (k in 1:10) {
+  clusters <- cutree(hc, k = k)
+  wcss[k] <- sum(sapply(unique(clusters), function(cluster) {
+    cluster_data <- pca_data[clusters == cluster, ]
+    sum(dist(cluster_data)^2)
+  }))
+}
+
+plot(1:10, wcss, type = "b", pch = 19, frame = FALSE,
+     xlab = "Number of Clusters",
+     ylab = "Within-Cluster Sum of Squares (WCSS)",
+     main = "Elbow Method for Hierarchical Clustering")
+
+
+plot(hc, labels = FALSE, main = "Dendrogram")
+rect.hclust(hc, k = 5, border = "red") 
+
+
+clusters <- cutree(hc, k = 5)
+
+
+plot(pca_data[, 1], pca_data[, 2], col = clusters, pch = 19,
+     xlab = "PC1", ylab = "PC2",
+     main = "Clusters Visualized in PCA Space")
+legend("topright", legend = unique(clusters), col = unique(clusters), pch = 19)
+```
+
+By examining the elbow plot, we identified the optimal number of clusters as 5. This is where adding more clusters does not significantly reduce the within-cluster sum of squares (WCSS). When we visualize the dendrogram with rectangles, we see the clusters identified by the hierarchical clustering. Each rectangle represents a distinct cluster. The clusters Visualization in PCA space shows how different market segments are distributed. Each color in the plot represents a different market segment, which helps to identify distinct audience profiles.
+
+Another step I took was examining the correlation matrix between variables. By analyzing the correlation coefficients, we can identify which categories are closely related or strongly correlated. The heatmap visually represents this correlation matrix, with color gradients indicating the strength of the correlations. I wanted to look at this because understanding which variables are correlated can provide better insights into the structure of the clusters identified by hierarchical clustering.
+
+```{r}
+# Calculate correlation matrix
+relevant_names <- c('current_events', 'travel', 'photo_sharing', 'tv_film', 
+               'sports_fandom', 'politics', 'food', 'family', 
+               'shopping', 'health_nutrition', 'college_uni', 'cooking')
+correlation_matrix <- cor(categories[ , relevant_names], use = "complete.obs")
+
+# Plot heatmap of the correlation matrix
+library(heatmaply)
+#install.packages('heatmaply')
+heatmaply(correlation_matrix, 
+          main = "Correlation Heatmap of Categories",
+          xlab = "Categories",
+          ylab = "Categories")
+
+```
+
+From the correlation matrix, the top 3 most highly correlated variables pairs are:
+1. Politics and Travel 
+2. Shopping and Photo Sharing
+3. Sports Fandom and Food 
+
+One important thing that I wanted to point out in the correlation matrix is that Sports Fandom and Food, Family and Food, and Family and Sports fandom all have very similar correlations. This could be a possible market segment for Nutrient H20 to tap into! Familes who are into sports, they could be throwing nieghborhood watch parties to all get together and try new receipies that they see online and watch the big game of the weekend! NutrientH20 could consider creating a few posts about "gameday bites" and give suggestions for creative snacks to bring to the watch parties. 
+
+Another possible segment to tap into is The followers who are into politics and traveling. I think this segment is the working professionals who want to voice their opinion on politics and who have extra cash to travel! A way to target them could be by posting about various cities that host political or social movement rallies/events. 
+
+A third possible segment are the shoppers and photo sharers. A good way to connect with this segment could be by running campaigns that encourage photo sharing of purchases, such as contests or hashtag challenges, to increase brand visibility and engagement!
+

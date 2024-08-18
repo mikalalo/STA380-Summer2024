@@ -6,9 +6,12 @@
 - Wrangling the Billboard Top 100
 - Visual story telling part 1: Green Buildings
 - Visual story telling part 2: Capital Metro data
+- Clustering and dimensionality reduction
+   - Completed in R
 - Market segmentation
 - The Reuters corpus
 - Association rule mining
+   - Completed in R
 - Image classification with neural networks
 
 

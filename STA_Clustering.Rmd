@@ -1,0 +1,107 @@
+---
+title: "STA_Clustering"
+output: html_document
+date: "2024-08-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+## Clustering and dimensionality reduction 
+# I used chat GPT to help create the code for this problem 
+
+library(tidyverse)
+library(caret)
+library(ggplot2)
+
+wine = read.csv('/Users/teamccormack/Downloads/wine.csv')
+head(wine)
+
+# get data set features 
+features <- wine[, 1:11] 
+# get data set labels
+labels <- wine[, c('color', 'quality')]  
+
+# Standardize the features
+features_scaled <- scale(features)
+
+
+########################################
+# PCA
+pca <- princomp(features)
+summary(pca)
+pca$loading[, 1:2]
+
+pca_result <- prcomp(features_scaled, center = TRUE, scale. = TRUE)
+
+# PCA data frame 
+pca_df <- as.data.frame(pca_result$x)
+pca_df$color <- wine$color
+pca_df$quality <- wine$quality
+
+# plot PCA color of wine 
+ggplot(pca_df, aes(x = PC1, y = PC2, color = color)) +
+  geom_point(alpha = 0.5) 
+
+# plot PCA quality of wine 
+ggplot(pca_df, aes(x = PC1, y = PC2, color = quality)) +
+  geom_point(alpha = 0.5)
+```
+PCA plots clustering the color of wine and the quality of the wine. With the PCA approach, it is easily capable of distinguishing the reds from the whites. There does happen to be overlap between the two colors, however, the clustering split is pretty distinct and obvious. 
+
+With the PCA approach, it is difficult to determine clustering for quality of wine. While color only has two types, quality has 7. This makes it much more difficult to differentiate the various quality types in the clustering image. 
+
+Overall, the PCA approach is good at distinguising reds from whites, but is not that good at distinguishing lower quality wine from higher quality wine. 
+
+
+```{r}
+# Perform t-SNE
+library(Rtsne)
+
+tsne <- Rtsne(features_scaled, dims = 2, pca = TRUE, check_duplicates = FALSE)
+
+# Create a data frame for t-SNE results
+tsne_df <- as.data.frame(tsne$Y)
+tsne_df$color <- wine$color
+tsne_df$quality <- wine$quality
+
+# Plot t-SNE: Color of wine
+ggplot(tsne_df, aes(x = V1, y = V2, color = color)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "t-SNE: Color of Wine")
+
+# Plot t-SNE: Quality of wine
+ggplot(tsne_df, aes(x = V1, y = V2, color = quality)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "t-SNE: Quality of Wine")
+
+```
+With the t-SNE approach, it can easily distinguish red wine from white wine. There are a few white wine outliers, but for the most part, the distinction between red and white win is present. 
+
+With the t-SNE approach, it can not easily distinguish lower quality wine from higher quality wine. While the plot is more spread out and easier to disnguish different quality levels, there is a lot of overlap that makes it difficult to determine if there is a specific cluster of a certain quality of wine. 
+
+Overall. the t-SNE approach is good for distinguising color of wine, but not that good at distinguishing quality of wine. When compared to PCA, t-SNE does seem to do a better job at distinguishing color and quality. 
+
+
+```{r}
+# perform K means 
+set.seed(9)
+kmeans = kmeans(features_scaled, centers = 2)
+
+# data frame of kmeans results 
+kmeans_df = as.data.frame(tsne$Y)
+kmeans_df$cluster = factor(kmeans$cluster)
+kmeans_df$color = wine$color 
+kmeans_df$quality = wine$quality
+
+# plot k means clustering color of wine 
+ggplot(kmeans_df, aes(x = V1, y = V2, color = color)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "k means: Color of Wine") 
+
+```
+With K means, the plot of clustering shows 2 distinct groups for red and white wine. There is some outliers from white that overlap with red. The plot looks extremely similar to the of t-SNE. 

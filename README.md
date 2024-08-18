@@ -7,9 +7,9 @@
 - Wrangling the Billboard Top 100
    - Completed in R
 - Visual story telling part 1: Green Buildings
-   - Completed in R
+   - Completed in Python
 - Visual story telling part 2: Capital Metro data
-   - Completed in R
+   - Completed in Python
 - Clustering and dimensionality reduction
    - Completed in R
 - Market segmentation

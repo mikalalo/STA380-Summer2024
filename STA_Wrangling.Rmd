@@ -1,3 +1,15 @@
+---
+title: "STA_Wrangling"
+output: html_document
+date: "2024-08-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
 ## Wrangling the Billboard Top 100
 # Part A 
 
@@ -24,12 +36,13 @@ top_10 <- head(count, 10)
 top_10 # displays top 10 
 
 print('The table shows that the top 10 song and performer combinations spent between 64 and 87 weeks on the Billboard Top 100. The top performer and song combination is Radioactive by Imagine Dragons.')
+```
+The table shows the top 10 most popular songs from 1958 to 2021. The data includes perfomer, song, and count, and differentiates different popular song names based on the artist that performed them. The top performer and song combination is Radioactive by Imagine Dragons.
+
+Part A creates a table of the 10 most popular songs since 1958, and includes performer, song, and count. Performer and song were grouped together in order to get the count that the song and performer appeared on the top 100. The top 10 are then sorted, starting with which song was the most popular. 
 
 
-# The table shows the top 10 most popular songs from 1958 to 2021. The data includes perfomer, song, and count, and differentiates different popular song names based on the artist that performed them. 
-# Part A creates a table of the 10 most popular songs since 1958, and includes performer, song, and count. Performer and song were grouped together in order to get the count that the song and performer appeared on the top 100. The top 10 are then sorted, starting with which song was the most popular. 
-
-
+```{r}
 # Part B 
 
 # exclude year 1958 and 2021 
@@ -51,11 +64,11 @@ ggplot(musical_diversity, aes(x = year, y = num_unique_songs)) +
   geom_point() +  
   labs(caption = 'The plot shows the number of unique songs for each year from 1958 to 2020. 
        1958 and 2021 were excluded becuase all data for both of those years had not been collected.')
+```
+For years with complete data (not 1958 and 2021), the number of unique songs that appeared on the top 100 was counted. When looking at the graph, you can see that there is a distinct drop in the number of unique songs between 1980 and 2010. 
 
 
-# For years with complete data (not 1958 and 2021), the number of unique songs that appeared on the top 100 was counted. When looking at the graph, you can see that there is a distinct drop in the number of unique songs between 1980 and 2010. 
-
-
+```{r}
 # Part C 
 
 # get artists that have songs for at least 10 weeks 
@@ -82,5 +95,5 @@ ggplot(artist_10_weeks, aes(x = performer, y = num_hit_greater10)) +
     y = "Number of Ten-Week Hits",
     caption = "The bar graph shows 19 artists that have had at least 30 songs that were 10 week hits."
   )
-
-# I began by getting all of the artists that had a song on the billboard chart for at least 10 weeks. Next, I took that data and grouped by performer, and made sure that a performer's count was greater than 30. That resulted in 19 artists having at least 30 hits. The bar plot shows the amount of ten week hits that an artist has vs. the performer. 
+```
+I began by getting all of the artists that had a song on the billboard chart for at least 10 weeks. Next, I took that data and grouped by performer, and made sure that a performer's count was greater than 30. That resulted in 19 artists having at least 30 hits. The bar plot shows the amount of ten week hits that an artist has vs. the performer. 

@@ -1,5 +1,16 @@
+---
+title: "STA_Rule_Mining"
+output: html_document
+date: "2024-08-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
 ## Association Rule Mining 
-# I used Chat GPT to check my errors with the code 
 
 library(tidyverse)
 library(igraph)
@@ -59,14 +70,12 @@ inspect(subset(association_rules, lift > 25))
 # playlists_graph = associations2igraph(subset(association_rules, lift>4), associationsAsNodes = FALSE)
 # igraph::write_graph(playlists_graph, file='groceries.graphml', format = "graphml")
 
+```
+To determine the threshold, I looked at various lift and confidence plots, and utilized the plot below that shows association rules by lift and confidence. I tested various lift and confidence values to see if they would have an affect on the plots. For the most part, the plots remained similar, however, when using a very small lift value, the plot was unrecognizable, and did not include many data points. I used a confidence value of 0.620 in order to increase the threshold value. I also did not want to increase the threshold too much and have too few rules. I used a lift threshold of 15. 
 
-# To determine the threshold, I looked at various lift and confidence plots, and utilized the plot below that shows association rules by lift and confidence. I tested various lift and confidence values to see if they would have an affect on the plots. For the most part, the plots remained similar, however, when using a very small lift value, the plot was unrecognizable, and did not include many data points. I used a confidence value of 0.620 in order to increase the threshold value. I also did not want to increase the threshold too much and have too few rules. I used a lift threshold of 15. 
+The discovered item sets include a lot of whole milk and vegetables. This makes sense because milk and vegatables are part of the two main food groups that we should be eating daily, so it is expected that a lot of baskets will contain these items. 
 
-# The discovered item sets include a lot of whole milk and vegetables. This makes sense because milk and vegatables are part of the two main food groups that we should be eating daily, so it is expected that a lot of baskets will contain these items. 
-
-
-####################
-# I used Chat GPT to help with creating this code 
+```{r}
 library(arules)
 library(ggplot2)
 
@@ -117,5 +126,6 @@ ggplot(rules_df, aes(x = confidence, y = lift, color = threshold)) +
   theme_minimal() +
   scale_color_brewer(palette = "Set1")
 
+```
+The code in this section was used to plot various lift and confidence values and their accompanying threshold. By using this I decided to use a confidence value of 0.620. This is an increase from my original confidence value.
 
-# The code in this section was used to plot various lift and confidence values and their accompanying threshold. By using this I decided to use a confidence value of 0.620. This is an increase from my original confidence value.

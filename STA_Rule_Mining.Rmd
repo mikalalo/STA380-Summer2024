@@ -1,0 +1,131 @@
+---
+title: "STA_Rule_Mining"
+output: html_document
+date: "2024-08-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+## Association Rule Mining 
+
+library(tidyverse)
+library(igraph)
+library(arules)  
+library(arulesViz)
+
+
+groceries_raw = readLines("/Users/teamccormack/Downloads/groceries.txt")
+
+str(groceries_raw)
+summary(groceries_raw)
+
+# each line gets separated by its items 
+basket_items = strsplit(groceries_raw, ',')
+# convert from list to object 
+basket_object = as(basket_items, 'transactions')
+summary(basket_object)
+
+# Fitting model 
+# Training Apriori on the dataset 
+association_rules = apriori(basket_object, 
+						parameter = list(support = 0.005, 
+										confidence = 0.1)) 
+
+# look at the output
+inspect(association_rules)
+
+
+
+## Choose a subset
+inspect(subset(association_rules, subset=lift > 2.5))
+inspect(subset(association_rules, subset=confidence > 0.620))
+inspect(subset(association_rules, subset=lift > 15 & confidence > 0.620))
+
+# plot all the rules in (support, confidence) space
+# notice that high lift rules tend to have low support
+plot(association_rules)
+
+# can swap the axes and color scales
+plot(association_rules, measure = c("support", "lift"), shading = "confidence")
+
+# "two key" plot: coloring is by size (order) of item set
+plot(association_rules, method='two-key plot')
+
+# can now look at subsets driven by the plot
+inspect(subset(association_rules, support > 0.035))
+inspect(subset(association_rules, confidence > 0.620))
+inspect(subset(association_rules, lift > 25))
+
+
+## WORKS WITH GEPHI
+# # graph-based visualization
+# # export
+# # associations are represented as edges
+# # For rules, each item in the LHS is connected
+# # with a directed edge to the item in the RHS. 
+# playlists_graph = associations2igraph(subset(association_rules, lift>4), associationsAsNodes = FALSE)
+# igraph::write_graph(playlists_graph, file='groceries.graphml', format = "graphml")
+
+```
+To determine the threshold, I looked at various lift and confidence plots, and utilized the plot below that shows association rules by lift and confidence. I tested various lift and confidence values to see if they would have an affect on the plots. For the most part, the plots remained similar, however, when using a very small lift value, the plot was unrecognizable, and did not include many data points. I used a confidence value of 0.620 in order to increase the threshold value. I also did not want to increase the threshold too much and have too few rules. I used a lift threshold of 15. 
+
+The discovered item sets include a lot of whole milk and vegetables. This makes sense because milk and vegatables are part of the two main food groups that we should be eating daily, so it is expected that a lot of baskets will contain these items. 
+
+```{r}
+library(arules)
+library(ggplot2)
+
+# Load and prepare data
+groceries_raw = readLines("/Users/teamccormack/Downloads/groceries.txt")
+basket_items = strsplit(groceries_raw, ',')
+basket_object = as(basket_items, 'transactions')
+
+# Generate association rules
+association_rules = apriori(data = basket_object, 
+                            parameter = list(support = 0.005, 
+                                             confidence = 0.1))
+
+# Subset rules based on various thresholds
+rules_lift_5 <- subset(association_rules, lift > 5)
+rules_lift_10 <- subset(association_rules, lift > 10)
+rules_confidence_0.6 <- subset(association_rules, confidence > 0.6)
+rules_confidence_0.8 <- subset(association_rules, confidence > 0.8)
+
+# Create a data frame for plotting
+rules_df <- data.frame(
+  lift = c(
+    quality(rules_lift_5)$lift,
+    quality(rules_lift_10)$lift,
+    quality(rules_confidence_0.6)$lift,
+    quality(rules_confidence_0.8)$lift
+  ),
+  confidence = c(
+    quality(rules_lift_5)$confidence,
+    quality(rules_lift_10)$confidence,
+    quality(rules_confidence_0.6)$confidence,
+    quality(rules_confidence_0.8)$confidence
+  ),
+  threshold = factor(c(
+    rep("Lift > 5", length(quality(rules_lift_5)$lift)),
+    rep("Lift > 10", length(quality(rules_lift_10)$lift)),
+    rep("Confidence > 0.6", length(quality(rules_confidence_0.6)$lift)),
+    rep("Confidence > 0.8", length(quality(rules_confidence_0.8)$lift))
+  ))
+)
+
+# Plotting the rules based on lift and confidence thresholds
+ggplot(rules_df, aes(x = confidence, y = lift, color = threshold)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Association Rules by Lift and Confidence",
+       x = "Confidence",
+       y = "Lift") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+```
+The code in this section was used to plot various lift and confidence values and their accompanying threshold. By using this I decided to use a confidence value of 0.620. This is an increase from my original confidence value.
+

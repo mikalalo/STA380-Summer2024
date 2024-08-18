@@ -13,6 +13,6 @@
 
 
 Group: 
--Alicia Tonachio
--Téa McCormack
--Mikala Lowrance
+- Alicia Tonachio
+- Téa McCormack
+- Mikala Lowrance

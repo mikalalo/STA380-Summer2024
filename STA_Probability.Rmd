@@ -1,3 +1,15 @@
+---
+title: "STA_Probability"
+output: html_document
+date: "2024-08-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
 ## Probability Practice 
 # Part A
 
@@ -19,10 +31,13 @@ prob.rc.no = 0.50
 prob.yes.tc = (prob.yes - (prob.rc.yes * prob.rc)) / prob.tc
 prob.yes.tc
 
-# In part A, the rule of total probability was used in order to calculate the fraction of people who are truthful clickers and answered yes. 
-# The fraction of people that are truthful clickers and answered yes is 0.7142857 or 71.43%.
+```
+In part A, the rule of total probability was used in order to calculate the fraction of people who are truthful clickers and answered yes. 
+
+The fraction of people that are truthful clickers and answered yes is 0.7142857 or 71.43%.
 
 
+```{r}
 ## Probability Practice 
 # Part B 
 
@@ -45,5 +60,7 @@ prob.positive
 prob.disease.pos = (sensitivity * incidence) / prob.positive
 prob.disease.pos
 
-# The probability that someone tests positive and that actually have the disease is 0.1988824 or 19.88%. 
-# The probability was calculated by first calculating the probability of not having the disease and the probability of testing positive and not having the disease. The Rule of Total Probability was used in order to calculate the probability of person testing positive. Baye's Theorem was then used to determine the probability of having the disease if they test positive. 
+```
+The probability that someone tests positive and that actually have the disease is 0.1988824 or 19.88%. 
+
+The probability was calculated by first calculating the probability of not having the disease and the probability of testing positive and not having the disease. The Rule of Total Probability was used in order to calculate the probability of person testing positive. Baye's Theorem was then used to determine the probability of having the disease if they test positive. 

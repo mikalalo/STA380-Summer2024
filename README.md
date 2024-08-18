@@ -3,7 +3,9 @@
 ## STA 380, Part 2: Exercises
 
 - Probability Practice
+   - Completed in R
 - Wrangling the Billboard Top 100
+   - Completed in R
 - Visual story telling part 1: Green Buildings
 - Visual story telling part 2: Capital Metro data
 - Clustering and dimensionality reduction

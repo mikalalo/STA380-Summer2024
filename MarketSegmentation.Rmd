@@ -1,19 +1,25 @@
 ---
 title: "exercises"
-author: "group: Tea, Mikala, Alicia"
+author: 'group: Tea, Mikala, Alicia'
 date: "2024-08-06"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
+
 
 ## Market Segmentation
 
 In efforts to help NutrientH20 better understand their social-media audience, I have investigated the data to help identify areas of interest. The first step I took was looking at the structure of the data to understand how to explore it best. Below you can see some of the work I did for that. 
 
 ```{r}
+library(readr)
 social_marketing <- read_csv("social_marketing.csv")
 names(social_marketing)
 
@@ -100,6 +106,7 @@ library(dplyr)
 library(stats)
 library(ggplot2)
 library(ggdendro)
+library(reshape2)
 ```
 
 ```{r}
@@ -151,20 +158,20 @@ By examining the elbow plot, we identified the optimal number of clusters as 5. 
 Another step I took was examining the correlation matrix between variables. By analyzing the correlation coefficients, we can identify which categories are closely related or strongly correlated. The heatmap visually represents this correlation matrix, with color gradients indicating the strength of the correlations. I wanted to look at this because understanding which variables are correlated can provide better insights into the structure of the clusters identified by hierarchical clustering.
 
 ```{r}
-# Calculate correlation matrix
 relevant_names <- c('current_events', 'travel', 'photo_sharing', 'tv_film', 
-               'sports_fandom', 'politics', 'food', 'family', 
-               'shopping', 'health_nutrition', 'college_uni', 'cooking')
-correlation_matrix <- cor(categories[ , relevant_names], use = "complete.obs")
+                     'sports_fandom', 'politics', 'food', 'family', 
+                     'shopping', 'health_nutrition', 'college_uni', 'cooking')
 
-# Plot heatmap of the correlation matrix
-library(heatmaply)
-#install.packages('heatmaply')
-heatmaply(correlation_matrix, 
-          main = "Correlation Heatmap of Categories",
-          xlab = "Categories",
-          ylab = "Categories")
 
+correlation_matrix <- cor(categories[, relevant_names], use = "complete.obs")
+correlation_melted <- melt(correlation_matrix)
+
+ggplot(correlation_melted, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, name = "Correlation") +
+  theme_minimal() +
+  labs(title = "Correlation Heatmap of Categories", x = "Categories", y = "Categories") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 From the correlation matrix, the top 3 most highly correlated variables pairs are:

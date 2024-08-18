@@ -1,5 +1,5 @@
 ---
-title: "reuters_authors"
+title: "reuters_again"
 author: "Lowrance, Mikala"
 date: "2024-08-18"
 output: pdf_document
@@ -11,7 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-```{r}
+
+
+```{r Reuters}
 library(tm)
 library(tidyverse)
 
@@ -55,9 +57,8 @@ my_documents = tm_map(my_documents, content_transformer(stripWhitespace))
 #stopwords("SMART")
 my_documents = tm_map(my_documents, content_transformer(removeWords), stopwords("en"))
 my_documents = tm_map(my_documents, content_transformer(removeWords), stopwords("SMART"))
-```
 
-```{r}
+
 # Create document-term matrix
 DTM_reuters = DocumentTermMatrix(my_documents)
 class(DTM_reuters)  
@@ -69,16 +70,17 @@ findAssocs(DTM_reuters, "approve", .5)
 
 # Remove infrequent terms
 DTM_reuters = removeSparseTerms(DTM_reuters, 0.95)
-DTM_reuters 
+DTM_reuters
 
 # Create TF-IDF weights
 tfidf_reuters = weightTfIdf(DTM_reuters)
 
 # Compare documents
 #inspect(tfidf_reuters[1,])
-```
 
-```{r Dimensionality Reduction}
+####
+# Dimensionality reduction
+####
 
 # PCA on term frequencies
 X = as.matrix(tfidf_reuters)
@@ -94,27 +96,27 @@ pca_reuters$rotation[order(abs(pca_reuters$rotation[,1]),decreasing=TRUE),1][1:2
 pca_reuters$rotation[order(abs(pca_reuters$rotation[,2]),decreasing=TRUE),2][1:25]
 
 # Look at the first two PCs
-pca_reuters$x[,1:2]
+#pca_reuters$x[,1:2]
 
 plot(pca_reuters$x[,1:2], xlab="PCA 1 direction", ylab="PCA 2 direction", bty="n",
      type='n')
 text(pca_reuters$x[,1:2], labels = 1:length(reuters), cex=0.7)
 
 # Cluster documents
-# define the distance matrix using the PCA scores
-#dist_mat = dist(pca_reuters$x)
-#tree_reuters = hclust(dist_mat)
+
+# define the distance matrix
+# using the PCA scores
+dist_mat = dist(pca_reuters$x)
+tree_reuters = hclust(dist_mat)
 #plot(tree_reuters)
-#clust5 = cutree(tree_reuters, k=5)
+clust5 = cutree(tree_reuters, k=5)
 
 # Inspect the clusters
 which(clust5 == 5)
 content(reuters[[651]])
 content(reuters[[652]])
-```
 
-```{r}
-
+##########
 # Create a data frame for plotting
 df <- data.frame(
   PC1 = pca_reuters$x[,1],  # First principal component
@@ -122,23 +124,6 @@ df <- data.frame(
   Author = as.factor(author_names)  # Author names as factors
 )
 
-# Sum the counts of each word across all documents
-word_freq <- colSums(as.matrix(DTM_reuters))
-
-# Sort the words by frequency
-word_freq_sorted <- sort(word_freq, decreasing = TRUE)
-
-# View the top 10 most frequent words
-head(word_freq_sorted, 10)
-
-# Generate the word cloud
-library(wordcloud)
-wordcloud(words = names(word_freq_sorted), freq = word_freq_sorted, 
-          min.freq = 10, scale = c(3, 0.5),
-          colors = brewer.pal(8, "Dark2"))
-```
-
-```{r Cluster by authors}
 # Try clustering with authors
 df <- data.frame(
   PC1 = pca_reuters$x[,1],  # First principal component
@@ -172,9 +157,10 @@ ggplot(df, aes(x = PC1, y = PC2, color = Cluster, shape = Author)) +
 
 # Create a table of cluster assignments for each author
 table(df$Author, df$Cluster)
-```
-Question: What reuters author write about similar topics? If I like the writing of a specific writer in Reuters, what other authors should I read? 
 
-Approach: We created a corpus of reuters documents from 42 authors. First, we used a tokenization approach on every word and compiled the words into a document term matrix. After that, we removed all of the infrequent words and commonly used "stop words". Lastly, we created TF-IDF weights for the terms in the DTM to appropriately weigh frequent words within a specific document, yet rare across the corpus. After completing these pre-processing steps, we applied principle component analysis (PCA) to the reduce dimensionality and allow a visualization of the distribution of documents within a 2D space. We kept only 2 principle components to easily view relationships and clusters. To finally view the similarity of authors, we clustered the documents into 5 categories based on the PCA results. 
+```
+Question: What reuters author write about similar topics? If I like the writing of a specific writer in Reuters, what other authors should I read?
+
+Approach: We created a corpus of reuters documents from 42 authors. First, we used a tokenization approach on every word and compiled the words into a document term matrix. After that, we removed all of the infrequent words and commonly used "stop words". Lastly, we created TF-IDF weights for the terms in the DTM to appropriately weigh frequent words within a specific document, yet rare across the corpus. After completing these pre-processing steps, we applied principle component analysis (PCA) to the reduce dimensionality and allow a visualization of the distribution of documents within a 2D space. We kept only 2 principle components to easily view relationships and clusters. To finally view the similarity of authors, we clustered the documents into 5 categories based on the PCA results.
 
 Conclusion: This graph allows us to see the similarity of what authors write about, and where there is crossover. For example, Benjamin Kang Lim is the only writer in cluster 5, while he has a few documents that fall into cluster 3 and are similar to the majority of Alan Crosby's work. Conversely to cluster 5, cluster 4 has several authors with similar documents. Reuters and other publishing companies could use this analysis to recommend similar authors to a reader.
